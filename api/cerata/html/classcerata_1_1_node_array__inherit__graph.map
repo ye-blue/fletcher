@@ -1,0 +1,7 @@
+<map id="cerata::NodeArray" name="cerata::NodeArray">
+<area shape="rect" id="node1" title="An array of nodes." alt="" coords="78,155,206,181"/>
+<area shape="rect" id="node4" href="$classcerata_1_1_port_array.html" title="An array of port nodes." alt="" coords="5,229,127,256"/>
+<area shape="rect" id="node5" href="$classcerata_1_1_signal_array.html" title="An array of signal nodes." alt="" coords="151,229,285,256"/>
+<area shape="rect" id="node2" href="$classcerata_1_1_object.html" title="A Cerata Object on a graph." alt="" coords="90,80,194,107"/>
+<area shape="rect" id="node3" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="88,5,196,32"/>
+</map>

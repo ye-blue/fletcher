@@ -1,0 +1,10 @@
+<map id="cerata::Signal" name="cerata::Signal">
+<area shape="rect" id="node1" title="A Signal Node." alt="" coords="163,393,265,420"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_normal_node.html" title="A NormalNode is a single&#45;input, multiple&#45;outputs node." alt="" coords="62,319,201,345"/>
+<area shape="rect" id="node3" href="$structcerata_1_1_multi_output_node.html" title="A MultiOutputNode is a Node that can drive multiple outputs." alt="" coords="49,244,213,271"/>
+<area shape="rect" id="node4" href="$classcerata_1_1_node.html" title="A node." alt="" coords="83,169,180,196"/>
+<area shape="rect" id="node5" href="$classcerata_1_1_object.html" title="A Cerata Object on a graph." alt="" coords="7,87,111,114"/>
+<area shape="rect" id="node6" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="5,5,113,32"/>
+<area shape="rect" id="node7" title=" " alt="" coords="135,80,274,121"/>
+<area shape="rect" id="node8" href="$classcerata_1_1_synchronous.html" title="Class to mark nodes with information for synchronous designs, e.g. clock domain." alt="" coords="225,319,368,345"/>
+</map>

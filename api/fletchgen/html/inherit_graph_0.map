@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,107,95,133"/>
+<area shape="rect" id="node2" href="$structfletchgen_1_1_array_cmd_ctrl_merger.html" title="Merges the address of a command stream with the rest of the command stream." alt="" coords="143,5,345,32"/>
+<area shape="rect" id="node3" href="$structfletchgen_1_1_kernel.html" title="The Kernel component to be implemented by the user." alt="" coords="184,56,304,83"/>
+<area shape="rect" id="node4" href="$classfletchgen_1_1_mantle.html" title="A component that wraps a Kernel and all ArrayReaders/Writers resulting from a Schema set." alt="" coords="183,107,305,133"/>
+<area shape="rect" id="node5" href="$structfletchgen_1_1_nucleus.html" title="It&#39;s like a kernel, but there is a kernel inside." alt="" coords="179,157,309,184"/>
+<area shape="rect" id="node6" href="$structfletchgen_1_1_record_batch.html" title="A RecordBatch aggregating ArrayReaders/Writers." alt="" coords="165,208,323,235"/>
+</map>

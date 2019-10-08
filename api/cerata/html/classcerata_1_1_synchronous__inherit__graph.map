@@ -1,0 +1,5 @@
+<map id="cerata::Synchronous" name="cerata::Synchronous">
+<area shape="rect" id="node1" title="Class to mark nodes with information for synchronous designs, e.g. clock domain." alt="" coords="39,5,182,32"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_port.html" title="A port is a terminator node on a graph." alt="" coords="5,80,96,107"/>
+<area shape="rect" id="node3" href="$classcerata_1_1_signal.html" title="A Signal Node." alt="" coords="121,80,223,107"/>
+</map>

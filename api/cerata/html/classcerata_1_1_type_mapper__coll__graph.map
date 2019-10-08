@@ -1,0 +1,7 @@
+<map id="cerata::TypeMapper" name="cerata::TypeMapper">
+<area shape="rect" id="node1" title="A structure to dynamically define type mappings between flattened types." alt="" coords="75,215,214,241"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="5,13,113,39"/>
+<area shape="rect" id="node4" href="$classcerata_1_1_type.html" title="A Type." alt="" coords="97,103,192,130"/>
+<area shape="rect" id="node3" href="$classcerata_1_1_mapping_matrix.html" title=" " alt="" coords="216,96,367,137"/>
+<area shape="rect" id="node5" title=" " alt="" coords="138,5,274,47"/>
+</map>

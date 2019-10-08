@@ -1,0 +1,32 @@
+<map id="cerata::Named" name="cerata::Named">
+<area shape="rect" id="node1" title="Convenience structure for anything that is named." alt="" coords="5,157,113,184"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_clock_domain.html" title="A clock domain." alt="" coords="161,5,307,32"/>
+<area shape="rect" id="node3" href="$classcerata_1_1_edge.html" title="A directed edge between two nodes." alt="" coords="186,56,282,83"/>
+<area shape="rect" id="node4" href="$classcerata_1_1_graph.html" title="A graph representing a hardware structure." alt="" coords="183,107,285,133"/>
+<area shape="rect" id="node7" href="$classcerata_1_1_object.html" title="A Cerata Object on a graph." alt="" coords="182,157,286,184"/>
+<area shape="rect" id="node19" href="$classcerata_1_1_rec_field.html" title="A Record field." alt="" coords="175,208,293,235"/>
+<area shape="rect" id="node20" href="$classcerata_1_1_type.html" title="A Type." alt="" coords="187,385,281,412"/>
+<area shape="rect" id="node30" href="$classcerata_1_1_type_mapper.html" title="A structure to dynamically define type mappings between flattened types." alt="" coords="165,436,303,463"/>
+<area shape="rect" id="node5" href="$classcerata_1_1_component.html" title="A Component graph." alt="" coords="355,31,488,57"/>
+<area shape="rect" id="node6" href="$classcerata_1_1_instance.html" title="An instance." alt="" coords="363,81,479,108"/>
+<area shape="rect" id="node8" href="$classcerata_1_1_node.html" title="A node." alt="" coords="373,132,470,159"/>
+<area shape="rect" id="node16" href="$classcerata_1_1_node_array.html" title="An array of nodes." alt="" coords="357,183,485,209"/>
+<area shape="rect" id="node9" href="$structcerata_1_1_multi_output_node.html" title="A MultiOutputNode is a Node that can drive multiple outputs." alt="" coords="536,132,700,159"/>
+<area shape="rect" id="node10" href="$classcerata_1_1_expression.html" title="A node representing a binary tree of other nodes." alt="" coords="752,81,883,108"/>
+<area shape="rect" id="node11" href="$classcerata_1_1_literal.html" title="A Literal Node." alt="" coords="767,132,868,159"/>
+<area shape="rect" id="node12" href="$structcerata_1_1_normal_node.html" title="A NormalNode is a single&#45;input, multiple&#45;outputs node." alt="" coords="748,183,887,209"/>
+<area shape="rect" id="node13" href="$classcerata_1_1_parameter.html" title="A Parameter node." alt="" coords="935,132,1061,159"/>
+<area shape="rect" id="node14" href="$structcerata_1_1_port.html" title="A port is a terminator node on a graph." alt="" coords="953,183,1043,209"/>
+<area shape="rect" id="node15" href="$classcerata_1_1_signal.html" title="A Signal Node." alt="" coords="947,233,1049,260"/>
+<area shape="rect" id="node17" href="$classcerata_1_1_port_array.html" title="An array of port nodes." alt="" coords="557,183,679,209"/>
+<area shape="rect" id="node18" href="$classcerata_1_1_signal_array.html" title="An array of signal nodes." alt="" coords="551,233,685,260"/>
+<area shape="rect" id="node21" href="$structcerata_1_1_bit.html" title="A bit type." alt="" coords="380,233,463,260"/>
+<area shape="rect" id="node22" href="$structcerata_1_1_boolean.html" title="Boolean type." alt="" coords="365,284,478,311"/>
+<area shape="rect" id="node23" href="$structcerata_1_1_integer.html" title="Integer type." alt="" coords="368,335,475,361"/>
+<area shape="rect" id="node24" href="$structcerata_1_1_natural.html" title="Natural type." alt="" coords="367,385,475,412"/>
+<area shape="rect" id="node25" href="$structcerata_1_1_nul.html" title="Void type. Useful for e.g. empty streams." alt="" coords="378,436,465,463"/>
+<area shape="rect" id="node26" href="$classcerata_1_1_record.html" title="A Record type containing zero or more RecordFields." alt="" coords="367,487,475,513"/>
+<area shape="rect" id="node27" href="$classcerata_1_1_stream.html" title="A Stream type." alt="" coords="367,537,475,564"/>
+<area shape="rect" id="node28" href="$structcerata_1_1_string.html" title="String type." alt="" coords="371,588,471,615"/>
+<area shape="rect" id="node29" href="$classcerata_1_1_vector.html" title="Vector type." alt="" coords="369,639,473,665"/>
+</map>

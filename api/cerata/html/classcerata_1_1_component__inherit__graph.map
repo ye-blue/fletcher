@@ -1,0 +1,5 @@
+<map id="cerata::Component" name="cerata::Component">
+<area shape="rect" id="node1" title="A Component graph." alt="" coords="5,155,139,181"/>
+<area shape="rect" id="node2" href="$classcerata_1_1_graph.html" title="A graph representing a hardware structure." alt="" coords="21,80,123,107"/>
+<area shape="rect" id="node3" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="18,5,126,32"/>
+</map>

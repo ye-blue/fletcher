@@ -1,0 +1,5 @@
+<map id="cerata::dot::Style::NodeStyle" name="cerata::dot::Style::NodeStyle">
+<area shape="rect" id="node1" title="Node style." alt="" coords="109,109,231,151"/>
+<area shape="rect" id="node2" href="$structcerata_1_1dot_1_1_style_1_1_node_style_1_1_type_style.html" title="Styles for specific node types." alt="" coords="5,5,164,47"/>
+<area shape="rect" id="node3" href="$structcerata_1_1dot_1_1_style_1_1_node_style_1_1_colors.html" title="Colors for nodes." alt="" coords="188,5,325,47"/>
+</map>

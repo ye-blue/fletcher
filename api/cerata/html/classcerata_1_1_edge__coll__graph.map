@@ -1,0 +1,7 @@
+<map id="cerata::Edge" name="cerata::Edge">
+<area shape="rect" id="node1" title="A directed edge between two nodes." alt="" coords="14,276,110,303"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="5,5,113,32"/>
+<area shape="rect" id="node4" href="$classcerata_1_1_object.html" title="A Cerata Object on a graph." alt="" coords="66,89,170,115"/>
+<area shape="rect" id="node3" href="$classcerata_1_1_node.html" title="A node." alt="" coords="69,172,167,199"/>
+<area shape="rect" id="node5" title=" " alt="" coords="194,81,333,123"/>
+</map>

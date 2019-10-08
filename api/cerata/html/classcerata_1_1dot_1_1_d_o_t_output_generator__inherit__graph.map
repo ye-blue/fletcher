@@ -1,0 +1,4 @@
+<map id="cerata::dot::DOTOutputGenerator" name="cerata::dot::DOTOutputGenerator">
+<area shape="rect" id="node1" title="OutputGenerator for DOT graphs." alt="" coords="5,80,221,107"/>
+<area shape="rect" id="node2" href="$classcerata_1_1_output_generator.html" title="Abstract class to generate language specific output from Graphs." alt="" coords="32,5,195,32"/>
+</map>

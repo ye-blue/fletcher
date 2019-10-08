@@ -1,0 +1,6 @@
+<map id="cerata::Node" name="cerata::Node">
+<area shape="rect" id="node1" title="A node." alt="" coords="83,169,180,196"/>
+<area shape="rect" id="node2" href="$classcerata_1_1_object.html" title="A Cerata Object on a graph." alt="" coords="7,87,111,114"/>
+<area shape="rect" id="node3" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="5,5,113,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="135,80,274,121"/>
+</map>

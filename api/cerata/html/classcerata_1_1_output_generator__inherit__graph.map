@@ -1,0 +1,5 @@
+<map id="cerata::OutputGenerator" name="cerata::OutputGenerator">
+<area shape="rect" id="node1" title="Abstract class to generate language specific output from Graphs." alt="" coords="141,5,304,32"/>
+<area shape="rect" id="node2" href="$classcerata_1_1dot_1_1_d_o_t_output_generator.html" title="OutputGenerator for DOT graphs." alt="" coords="5,87,221,114"/>
+<area shape="rect" id="node3" href="$classcerata_1_1vhdl_1_1_v_h_d_l_output_generator.html" title="VHDL Output Generator." alt="" coords="245,80,419,121"/>
+</map>

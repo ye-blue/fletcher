@@ -1,0 +1,7 @@
+<map id="fletchgen::Mantle" name="fletchgen::Mantle">
+<area shape="rect" id="node1" title="A component that wraps a Kernel and all ArrayReaders/Writers resulting from a Schema set." alt="" coords="133,171,255,197"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,81,95,108"/>
+<area shape="rect" id="node3" href="$classfletchgen_1_1_schema_set.html" title="A named set of schemas." alt="" coords="119,81,269,108"/>
+<area shape="rect" id="node4" title=" " alt="" coords="140,5,248,32"/>
+<area shape="rect" id="node5" title=" " alt="" coords="294,81,366,108"/>
+</map>

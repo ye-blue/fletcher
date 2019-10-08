@@ -1,0 +1,14 @@
+<map id="cerata::Type" name="cerata::Type">
+<area shape="rect" id="node1" title="A Type." alt="" coords="189,208,284,235"/>
+<area shape="rect" id="node4" href="$structcerata_1_1_bit.html" title="A bit type." alt="" coords="347,5,430,32"/>
+<area shape="rect" id="node5" href="$structcerata_1_1_boolean.html" title="Boolean type." alt="" coords="332,56,445,83"/>
+<area shape="rect" id="node6" href="$structcerata_1_1_integer.html" title="Integer type." alt="" coords="335,107,442,133"/>
+<area shape="rect" id="node7" href="$structcerata_1_1_natural.html" title="Natural type." alt="" coords="335,157,443,184"/>
+<area shape="rect" id="node8" href="$structcerata_1_1_nul.html" title="Void type. Useful for e.g. empty streams." alt="" coords="345,208,432,235"/>
+<area shape="rect" id="node9" href="$classcerata_1_1_record.html" title="A Record type containing zero or more RecordFields." alt="" coords="335,259,443,285"/>
+<area shape="rect" id="node10" href="$classcerata_1_1_stream.html" title="A Stream type." alt="" coords="335,309,443,336"/>
+<area shape="rect" id="node11" href="$structcerata_1_1_string.html" title="String type." alt="" coords="339,360,439,387"/>
+<area shape="rect" id="node12" href="$classcerata_1_1_vector.html" title="Vector type." alt="" coords="337,411,441,437"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_named.html" title="Convenience structure for anything that is named." alt="" coords="19,179,127,205"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,230,141,271"/>
+</map>

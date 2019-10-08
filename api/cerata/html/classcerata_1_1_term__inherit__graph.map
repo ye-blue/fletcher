@@ -1,0 +1,5 @@
+<map id="cerata::Term" name="cerata::Term">
+<area shape="rect" id="node1" title="A terminator structure to enable terminator sanity checks." alt="" coords="68,5,164,32"/>
+<area shape="rect" id="node2" href="$structcerata_1_1_port.html" title="A port is a terminator node on a graph." alt="" coords="5,80,96,107"/>
+<area shape="rect" id="node3" href="$classcerata_1_1_port_array.html" title="An array of port nodes." alt="" coords="121,80,242,107"/>
+</map>
