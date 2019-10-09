@@ -55,8 +55,8 @@ struct Options {
   bool axi_top = false;
   /// Whether to simulate an AXI top level.
   bool sim_top = false;
-  /// Whether to overwrite any existing generated files. Only works for .vhd.
-  bool overwrite = false;
+  /// Whether to backup any existing generated files.
+  bool backup = false;
 
   /// Vivado HLS template
   bool vivado_hls = false;

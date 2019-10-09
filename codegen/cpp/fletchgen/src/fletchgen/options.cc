@@ -54,10 +54,10 @@ bool Options::Parse(Options *options, int argc, char **argv) {
                  "  vhdl: Export as VHDL files (default).\n"
                  "  dot : Export as DOT graphs.");
 
-  app.add_flag("-f,--force", options->overwrite,
-               "Force overwriting source code files if they exists already. If this flag is *not* used and the source "
-               "file exists already in the specified path, the output filename will be <filename>.<extension>t. This "
-               "file IS always overwritten. This applies only to files that the user should modify.");
+  app.add_flag("-b,--backup", options->backup,
+               "Backup generated source code files if they exists already. If this flag is used and the source "
+               "file exists already in the specified path, the output filename will be <filename>.bak. This "
+               "file is always overwritten.");
 
   app.add_option("--regs", options->regs,
                  "Names of custom registers in the following format: \"<behavior>:<width>:<name>\", where <behavior> "
