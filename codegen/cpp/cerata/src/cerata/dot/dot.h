@@ -42,7 +42,7 @@ struct Grapher {
   /// @brief Generate a node.
   std::string GenNode(const Node &n, int level = 0);
   /// @brief Generate nodes.
-  std::string GenNodes(const Graph &graph, Node::NodeID id, int level = 0, bool nogroup = false);
+  std::string GenNodes(const Graph &graph, Node::NodeID id, int level = 0, bool no_group = false);
   /// @brief Generate a graph.
   std::string GenGraph(const Graph &graph, int level = 0);
   /// @brief Generate a DOT file.

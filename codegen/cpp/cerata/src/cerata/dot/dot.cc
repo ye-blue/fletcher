@@ -258,12 +258,12 @@ std::string Grapher::GenNode(const Node &n, int level) {
   return str.str();
 }
 
-std::string Grapher::GenNodes(const Graph &graph, Node::NodeID id, int level, bool nogroup) {
+std::string Grapher::GenNodes(const Graph &graph, Node::NodeID id, int level, bool no_group) {
   std::stringstream ret;
   auto nodes = graph.GetNodesOfType(id);
   auto arrays = graph.GetArraysOfType(id);
   if (!nodes.empty() || !arrays.empty()) {
-    if (!nogroup) {
+    if (!no_group) {
       ret << tab(level) << "subgraph cluster_" << sanitize(graph.name()) + "_" + ToString(id) << " {\n";
       // ret << tab(level + 1) << "label=\"" << ToString(id) << "s\";\n";
       ret << tab(level + 1) << "rankdir=LR;\n";
@@ -272,12 +272,12 @@ std::string Grapher::GenNodes(const Graph &graph, Node::NodeID id, int level, bo
       ret << tab(level + 1) << "color=\"" + style.nodegroup.color + "\";\n";
     }
     for (const auto &n : nodes) {
-      ret << GenNode(*n, level + nogroup + 1);
+      ret << GenNode(*n, level + no_group + 1);
     }
     for (const auto &a : arrays) {
-      ret << GenNode(*a->base(), level + nogroup + 1);
+      ret << GenNode(*a->base(), level + no_group + 1);
     }
-    if (!nogroup) {
+    if (!no_group) {
       ret << tab(level) << "}\n";
     }
   }
@@ -307,8 +307,8 @@ std::string Grapher::GenGraph(const Graph &graph, int level) {
   if (style.config.nodes.expressions)
     ret << GenNodes(graph, Node::NodeID::EXPRESSION, level + 1);
 
-  // if (config.nodes.literals)
-  //   ret << GenNodes(graph, Node::LITERAL, level + 1);
+  if (style.config.nodes.literals)
+    ret << GenNodes(graph, Node::NodeID::LITERAL, level + 1);
 
   if (style.config.nodes.parameters)
     ret << GenNodes(graph, Node::NodeID::PARAMETER, level + 1);
@@ -324,7 +324,6 @@ std::string Grapher::GenGraph(const Graph &graph, int level) {
     if (!comp.children().empty()) {
       ret << "\n";
     }
-
 
     // Graph children
     for (const auto &child : comp.children()) {

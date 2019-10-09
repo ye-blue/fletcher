@@ -121,7 +121,7 @@ Config Config::streams() {
 
 Config Config::normal() {
   static Config ret;
-  ret.nodes.parameters = true;
+  ret.nodes.parameters = false;
   ret.nodes.literals = false;
   ret.nodes.signals = true;
   ret.nodes.ports = true;
