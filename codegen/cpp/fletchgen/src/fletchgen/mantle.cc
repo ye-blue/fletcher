@@ -24,10 +24,9 @@
 #include <vector>
 
 #include "fletchgen/basic_types.h"
-#include "fletchgen/schema.h"
 #include "fletchgen/bus.h"
-#include "fletchgen/mmio.h"
 #include "fletchgen/nucleus.h"
+#include "fletchgen/axi4_lite.h"
 
 namespace fletchgen {
 
@@ -38,50 +37,42 @@ static std::string ArbiterMasterName(BusSpec spec) {
 }
 
 Mantle::Mantle(std::string name,
-               SchemaSet schema_set,
-               const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-               const std::vector<MmioReg> &custom_regs)
-    : Component(std::move(name)), schema_set_(std::move(schema_set)) {
+               const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+               const std::shared_ptr<Nucleus> &nucleus)
+    : Component(std::move(name)) {
 
-  // Add default ports
-  auto bcr = Port::Make("bcd", cr(), Port::Dir::IN, bus_cd());
-  auto kcr = Port::Make("kcd", cr(), Port::Dir::IN, kernel_cd());
-  auto regs = MmioPort::Make(Port::Dir::IN);
-  Add({bcr, kcr, regs});
-
+  // Add parameters.
   Add(bus_addr_width());
 
-  // Create and add every RecordBatch/Writer.
-  for (const auto &fs : schema_set_.schemas()) {
-    auto rb = RecordBatch::Make(fs);
-    recordbatch_components_.push_back(rb);
-    auto rb_inst = AddInstanceOf(rb.get());
-    recordbatch_instances_.push_back(rb_inst);
-    rb_inst->port("kcd") <<= kcr;
-    rb_inst->port("bcd") <<= bcr;
-  }
+  // Add bus clock/reset, kernel clock/reset and AXI4-lite port.
+  auto bcr = Port::Make("bcd", cr(), Port::Dir::IN, bus_cd());
+  auto kcr = Port::Make("kcd", cr(), Port::Dir::IN, kernel_cd());
+  auto regs = axi4_lite(Port::Dir::IN);
+  Add({bcr, kcr, regs});
 
-  // Create and add the Nucleus.
-  nucleus_ = Nucleus::Make(schema_set_.name(),
-                           cerata::ToRawPointers(recordbatch_components()),
-                           batch_desc,
-                           custom_regs);
-  nucleus_inst_ = AddInstanceOf(nucleus_.get());
+  // Instantiate the Nucleus and connect the ports.
+  nucleus_inst_ = AddInstanceOf(nucleus.get());
   nucleus_inst_->port("kcd") <<= kcr;
   nucleus_inst_->port("mmio") <<= regs;
 
-  // Connect all Arrow field derived ports.
-  for (const auto &r : recordbatch_instances_) {
-    auto field_ports = r->GetAll<FieldPort>();
+  // Instantiate all RecordBatches and connect the ports.
+  for (const auto &rb : recordbatches) {
+    auto rbi = AddInstanceOf(rb.get());
+    recordbatch_instances_.push_back(rbi);
+
+    // Connect ports.
+    rbi->port("bcd") <<= bcr;
+    rbi->port("kcd") <<= kcr;
+
+    // Obtain all the field-derived ports from the RecordBatch Instance.
+    auto field_ports = rbi->GetAll<FieldPort>();
+    // Depending on the function and mode, connect each field port in the right way.
     for (const auto &fp : field_ports) {
       if (fp->function_ == FieldPort::Function::ARROW) {
-        // If the port is an output, it's an input for the kernel and vice versa.
-        // Connect the ports and remember the edge.
-        std::shared_ptr<cerata::Edge> e;
         if (fp->dir() == cerata::Term::Dir::OUT) {
-          e = Connect(nucleus_inst_->port(fp->name()), fp);
+          Connect(nucleus_inst_->port(fp->name()), fp);
         } else {
-          e = Connect(fp, nucleus_inst_->port(fp->name()));
+          Connect(fp, nucleus_inst_->port(fp->name()));
         }
       } else if (fp->function_ == FieldPort::Function::COMMAND) {
         Connect(fp, nucleus_inst_->port(fp->name()));
@@ -142,20 +133,11 @@ Mantle::Mantle(std::string name,
   }
 }
 
-std::shared_ptr<Mantle> Mantle::Make(const std::string& name,
-                                     const SchemaSet &schema_set,
-                                     const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                                     const std::vector<MmioReg>& custom_regs) {
-  auto mantle = new Mantle(name, schema_set, batch_desc, custom_regs);
-  auto mantle_shared = std::shared_ptr<Mantle>(mantle);
-  cerata::default_component_pool()->Add(mantle_shared);
-  return mantle_shared;
-}
-
-std::shared_ptr<Mantle> Mantle::Make(const SchemaSet &schema_set,
-                                     const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                                     const std::vector<MmioReg>& custom_regs) {
-  return Make("Mantle", schema_set, batch_desc, custom_regs);
+/// @brief Construct a Mantle and return a shared pointer to it.
+std::shared_ptr<Mantle> mantle(const std::string &name,
+                               const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+                               const std::shared_ptr<Nucleus> &nucleus) {
+  return std::make_shared<Mantle>(name, recordbatches, nucleus);
 }
 
 }  // namespace fletchgen

@@ -61,6 +61,8 @@ struct FieldPort : public Port {
   std::shared_ptr<arrow::Field> field_;
   /// The Fletcher schema this port was derived from.
   std::shared_ptr<FletcherSchema> fletcher_schema_;
+  /// Whether this field port should be profiled.
+  bool profile_ = false;
 
   /**
    * @brief Construct a new port derived from an Arrow field.
@@ -71,6 +73,7 @@ struct FieldPort : public Port {
    * @param type            The Cerata type of the port.
    * @param dir             The port direction.
    * @param domain          The clock domain.
+   * @param profile         Whether this Field-derived Port should be profiled.
    */
   FieldPort(std::string name,
             Function function,
@@ -78,11 +81,13 @@ struct FieldPort : public Port {
             std::shared_ptr<FletcherSchema> fletcher_schema,
             std::shared_ptr<cerata::Type> type,
             Port::Dir dir,
-            std::shared_ptr<ClockDomain> domain)
+            std::shared_ptr<ClockDomain> domain,
+            bool profile)
       : Port(std::move(name), std::move(type), dir, std::move(domain)),
         function_(function),
         field_(std::move(field)),
-        fletcher_schema_(std::move(fletcher_schema)) {}
+        fletcher_schema_(std::move(fletcher_schema)),
+        profile_(profile) {}
 
   /**
    * @brief Construct a field-derived port for Arrow data.
@@ -143,9 +148,8 @@ struct FieldPort : public Port {
  */
 struct RecordBatch : public Component {
  public:
-  /// @brief Make a new RecordBatch(Reader/Writer) component, based on a Fletcher schema.
-  static std::shared_ptr<RecordBatch> Make(const std::shared_ptr<FletcherSchema> &fletcher_schema);
-
+  RecordBatch(const std::shared_ptr<FletcherSchema> &fletcher_schema,
+              fletcher::RecordBatchDescription batch_desc);
   /// @brief Obtain all ports derived from an Arrow field with a specific function.
   std::deque<std::shared_ptr<FieldPort>> GetFieldPorts(const std::optional<FieldPort::Function> &function = {}) const;
   /// @brief Obtain the data port derived from a specific Arrow field. Field must point to the exact same field object.
@@ -157,11 +161,10 @@ struct RecordBatch : public Component {
   std::deque<Instance *> reader_instances() const { return array_instances_; }
   /// @brief Return the Fletcher schema this RecordBatch(Reader/Writer) is based on.
   std::deque<std::shared_ptr<BusPort>> bus_ports() const { return bus_ports_; }
+  /// @brief Return the description of the RecordBatch this component is based on.
+  fletcher::RecordBatchDescription batch_desc() { return batch_desc_; }
 
  protected:
-  /// @brief RecordBatch constructor.
-  explicit RecordBatch(const std::shared_ptr<FletcherSchema> &fletcher_schema);
-
   /**
    * @brief Adds all ArrayReaders/Writers, unconcatenates ports and connects it to the top-level of this component.
    * @param fletcher_schema   A Fletcherized version of the Arrow Schema that this RecordBatch component will access.
@@ -179,6 +182,12 @@ struct RecordBatch : public Component {
   std::deque<std::shared_ptr<BusPort>> bus_ports_ = {};
   /// Mode
   Mode mode_ = Mode::READ;
+  /// The RecordBatch description.
+  fletcher::RecordBatchDescription batch_desc_;
 };
+
+/// @brief Make a new RecordBatch(Reader/Writer) component, based on a Fletcher schema.
+std::shared_ptr<RecordBatch> recordbatch(const std::shared_ptr<FletcherSchema> &fletcher_schema,
+                                         const fletcher::RecordBatchDescription &batch_desc);
 
 }  // namespace fletchgen

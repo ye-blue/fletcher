@@ -55,6 +55,7 @@ static std::string CanonicalizePath(const std::string &path) {
 }
 
 std::string GenerateSimTop(const Mantle &mantle,
+                           const SchemaSet& schema_set,
                            const std::vector<std::ostream *> &outputs,
                            const std::string &read_srec_path,
                            const std::string &write_srec_path,
@@ -66,8 +67,8 @@ std::string GenerateSimTop(const Mantle &mantle,
   constexpr int ndefault = FLETCHER_REG_SCHEMA;
 
   // Obtain read/write schemas.
-  auto read_schemas = mantle.schema_set().read_schemas();
-  auto write_schemas = mantle.schema_set().write_schemas();
+  auto read_schemas = schema_set.read_schemas();
+  auto write_schemas = schema_set.write_schemas();
 
   // Total number of RecordBatches
   size_t num_rbs = read_schemas.size() + write_schemas.size();
@@ -118,7 +119,7 @@ std::string GenerateSimTop(const Mantle &mantle,
   t.Replace("SREC_FIRSTLAST_INDICES", rb_meta.str());
 
   // Read/write specific memory models
-  if (mantle.schema_set().RequiresReading()) {
+  if (schema_set.RequiresReading()) {
     auto abs_path = CanonicalizePath(read_srec_path);
     t.Replace("BUS_READ_SLAVE_MOCK",
               "  rmem_inst: BusReadSlaveMock\n"
@@ -171,7 +172,7 @@ std::string GenerateSimTop(const Mantle &mantle,
     t.Replace("MST_RREQ_DECLARE", "");
     t.Replace("MST_RREQ_INSTANTIATE", "");
   }
-  if (mantle.schema_set().RequiresWriting()) {
+  if (schema_set.RequiresWriting()) {
     t.Replace("BUS_WRITE_SLAVE_MOCK",
               "  wmem_inst: BusWriteSlaveMock\n"
               "  generic map (\n"

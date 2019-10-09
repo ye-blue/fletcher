@@ -24,6 +24,7 @@ namespace fletchgen::top {
 
 /// @brief Generate an AXI top level on supplied output streams from a ColumnWrapper
 std::string GenerateAXITop(const Mantle &mantle,
+                           const SchemaSet &schema_set,
                            const std::vector<std::ostream *> &outputs);
 
 }  // namespace fletchgen::top

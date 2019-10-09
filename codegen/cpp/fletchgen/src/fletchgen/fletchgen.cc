@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "fletchgen/fletchgen.h"
+
 #include <cerata/api.h>
 #include <fletcher/common.h>
 
@@ -23,7 +25,6 @@
 #include "fletchgen/srec/recordbatch.h"
 #include "fletchgen/top/sim.h"
 #include "fletchgen/top/axi.h"
-#include "fletchgen/fletchgen.h"
 
 namespace fletchgen {
 
@@ -48,17 +49,15 @@ int fletchgen(int argc, char **argv) {
     return 0;
   }
 
-  // The resulting design.
-  fletchgen::Design design;
   // Potential RecordBatch descriptors for simulation models.
   std::vector<fletcher::RecordBatchDescription> srec_batch_desc;
 
   // Generate designs in Cerata
-  if (options->MustGenerateDesign()) {
-    design = fletchgen::Design::GenerateFrom(options);
-  } else {
+  if (!options->MustGenerateDesign()) {
     FLETCHER_LOG(ERROR, "No schemas detected. Cannot generate design.");
   }
+
+  fletchgen::Design design(options);
 
   // Generate SREC output
   if (options->MustGenerateSREC()) {
@@ -87,10 +86,7 @@ int fletchgen(int argc, char **argv) {
   // Generate simulation top level
   if (options->MustGenerateDesign() && options->sim_top) {
     std::ofstream sim_file;
-    std::string sim_file_path = options->output_dir + "/vhdl/SimTop_tc.vhd";
-    if (cerata::FileExists(sim_file_path) && !options->overwrite) {
-      sim_file_path += 't';
-    }
+    std::string sim_file_path = options->output_dir + "/vhdl/SimTop_tc.gen.vhd";
     FLETCHER_LOG(INFO, "Saving simulation top-level design to: " + sim_file_path);
     sim_file = std::ofstream(sim_file_path);
     // If the srec simulation dump path doesn't exist, it can't be canonicalized later on.
@@ -99,7 +95,8 @@ int fletchgen(int argc, char **argv) {
       std::ofstream srec_out(options->srec_sim_dump);
       srec_out.close();
     }
-    fletchgen::top::GenerateSimTop(*design.mantle,
+    fletchgen::top::GenerateSimTop(*design.mantle_comp,
+                                   *design.schema_set,
                                    {&sim_file},
                                    options->srec_out_path,
                                    options->srec_sim_dump,
@@ -110,13 +107,10 @@ int fletchgen(int argc, char **argv) {
   // Generate AXI top level
   if (options->axi_top) {
     std::ofstream axi_file;
-    std::string axi_file_path = options->output_dir + "/vhdl/AxiTop.vhd";
-    if (cerata::FileExists(axi_file_path) && !options->overwrite) {
-      axi_file_path += 't';
-    }
+    std::string axi_file_path = options->output_dir + "/vhdl/AxiTop.gen.vhd";
     FLETCHER_LOG(INFO, "Saving AXI top-level design to: " + axi_file_path);
     axi_file = std::ofstream(axi_file_path);
-    fletchgen::top::GenerateAXITop(*design.mantle, {&axi_file});
+    fletchgen::top::GenerateAXITop(*design.mantle_comp, *design.schema_set, {&axi_file});
     axi_file.close();
   }
 

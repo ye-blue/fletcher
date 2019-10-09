@@ -23,10 +23,13 @@
 #include "fletchgen/design.h"
 #include "fletchgen/recordbatch.h"
 #include "fletchgen/mmio.h"
+#include "fletchgen/profiler.h"
 
 namespace fletchgen {
 
 using cerata::OutputSpec;
+using F = MmioReg::Function;
+using B = MmioReg::Behavior;
 
 /// Short-hand for vector of RecordBatches.
 using RBVector = std::vector<std::shared_ptr<arrow::RecordBatch>>;
@@ -53,7 +56,6 @@ void Design::AnalyzeSchemas() {
   for (const auto &recordbatch : options->recordbatches) {
     schema_set->AppendSchema(recordbatch->schema());
   }
-
   // Sort the schema set according to the recordbatch ordering specification.
   // Important for the control flow through MMIO / buffer addresses.
   // First we sort recordbatches by name, then by mode.
@@ -78,13 +80,26 @@ void Design::AnalyzeRecordBatches() {
   }
 }
 
-static std::vector<MmioReg> ParseRegs(const std::vector<std::string> &regs) {
+static std::vector<MmioReg> GetDefaultRegs() {
   std::vector<MmioReg> result;
+  result.push_back(MmioReg{F::DEFAULT, B::CONTROL, "start", "Start the kernel.", 1, 0, 0});
+  result.push_back(MmioReg{F::DEFAULT, B::CONTROL, "stop", "Stop the kernel.", 1, 0, 1});
+  result.push_back(MmioReg{F::DEFAULT, B::CONTROL, "reset", "Reset the kernel.", 1, 0, 2});
+  result.push_back(MmioReg{F::DEFAULT, B::STATUS, "idle", "Kernel idle status.", 1, 4, 0});
+  result.push_back(MmioReg{F::DEFAULT, B::STATUS, "busy", "Kernel busy status.", 1, 4, 1});
+  result.push_back(MmioReg{F::DEFAULT, B::STATUS, "done", "Kernel done status.", 1, 4, 2});
+  result.push_back(MmioReg{F::DEFAULT, B::STATUS, "result", "Result.", 64, 8, 0});
+  return result;
+}
 
+static std::vector<MmioReg> ParseCustomRegs(const std::vector<std::string> &regs) {
+  std::vector<MmioReg> result;
+  // Iterate and parse every string.
   for (const auto &reg_str : regs) {
     std::regex expr(R"([c|s][\:][\d]+[\:][\w]+)");
     if (std::regex_match(reg_str, expr)) {
       MmioReg reg;
+      reg.function = MmioReg::Function::KERNEL;
       auto w_start = reg_str.find(':') + 1;
       auto i_start = reg_str.find(':', w_start) + 1;
       auto width_str = reg_str.substr(w_start, i_start - w_start);
@@ -97,66 +112,120 @@ static std::vector<MmioReg> ParseRegs(const std::vector<std::string> &regs) {
           break;
         default:FLETCHER_LOG(FATAL, "Register argument behavior character invalid for " + reg.name);
       }
-      // Calculate how much address space this register needs by rounding up to AXI4-lite words,
-      // that are byte addressed.
-      reg.addr_space_used = 4 * (reg.width / 32 + (reg.width % 32 != 0));
+      // Mark the register as a custom register for the kernel.
+      reg.meta["kernel"] = "true";
       result.push_back(reg);
     }
   }
   return result;
 }
 
-fletchgen::Design fletchgen::Design::GenerateFrom(const std::shared_ptr<Options> &opts) {
-  Design ret;
-  ret.options = opts;
+/// @brief Generate mmio registers from properly ordered RecordBatchDescriptions.
+static std::vector<MmioReg> GetRecordBatchRegs(const std::vector<fletcher::RecordBatchDescription> &batch_desc) {
+  std::vector<MmioReg> result;
 
-  // Analyze schemas and recordbatches to get schema_set and batch_desc
-  ret.AnalyzeSchemas();
-  ret.AnalyzeRecordBatches();
-
-  // Generate the hardware structure through Mantle and extract all subcomponents.
-  FLETCHER_LOG(INFO, "Generating Mantle...");
-  ret.custom_regs = ParseRegs(opts->regs);
-  ret.mantle = Mantle::Make(*ret.schema_set, ret.batch_desc, ret.custom_regs);
-  ret.kernel = ret.mantle->nucleus()->kernel;
-  ret.nucleus = ret.mantle->nucleus();
-  for (const auto &recordbatch_component : ret.mantle->recordbatch_components()) {
-    ret.recordbatches.push_back(recordbatch_component);
+  // Get first and last indices.
+  for (const auto &r : batch_desc) {
+    result.push_back(MmioReg({F::BATCH, B::CONTROL, r.name + "_firstidx", r.name + " first index.", 32}));
+    result.push_back(MmioReg({F::BATCH, B::CONTROL, r.name + "_lastidx", r.name + " last index (exclusive).", 32}));
   }
 
-  // Generate a Yaml file for vhdmmio based on the recordbatch description
-  GenerateVhdmmioYaml(ret.batch_desc, ret.custom_regs);
+  // Get all buffer addresses.
+  for (const auto &r : batch_desc) {
+    for (const auto &f : r.fields) {
+      for (const auto &b : f.buffers) {
+        auto buffer_port_name = r.name + "_" + fletcher::ToString(b.desc_);
+        // buf_port_names->push_back(buffer_port_name);
+        result.push_back(MmioReg({F::BUFFER, B::CONTROL, buffer_port_name,
+                                  "Buffer address for " + r.name + " " + fletcher::ToString(b.desc_), 64}));
+      }
+    }
+  }
+  return result;
+}
 
-  // TODO(johanpel): run vhdmmio in a nicer way
+Design::Design(const std::shared_ptr<Options> &opts) {
+  options = opts;
+
+  // Analyze schemas and recordbatches to get schema_set and batch_desc
+  AnalyzeSchemas();
+  AnalyzeRecordBatches();
+  // Sanity check our design for equal number of schemas and recordbatch descriptions.
+  if (schema_set->schemas().size() != batch_desc.size()) {
+    FLETCHER_LOG(FATAL, "Number of Schemas and RecordBatchDescriptions does not match.");
+  }
+
+  // Now that we have parsed some of the options, generate the design from the bottom up.
+  // The order in which to do this is from components that sink/source the kernel, to the kernel, and then to the
+  // upper layers of the hierarchy.
+
+  // Generate a RecordBatchReader/Writer component for every FletcherSchema / RecordBatchDesc.
+  for (size_t i = 0; i < batch_desc.size(); i++) {
+    auto schema = schema_set->schemas()[i];
+    auto rb_desc = batch_desc[i];
+    auto rb = recordbatch(schema, rb_desc);
+    recordbatches.push_back(rb);
+  }
+
+  // Generate the MMIO component model for this. This is based on four things;
+  // 1. The default registers (like control, status, result).
+  // 2. The RecordBatchDescriptions - for every recordbatch we need a first and last index, and every buffer address.
+  // 3. The custom kernel registers, parsed from the command line arguments.
+  // 4. The profiling registers, obtained from inspecting the generated recordbatches.
+  default_regs = GetDefaultRegs();
+  recordbatch_regs = GetRecordBatchRegs(batch_desc);
+  kernel_regs = ParseCustomRegs(opts->regs);
+  profiling_regs = GetProfilingRegs(recordbatches);
+
+  // Merge these registers together into one register file for component generation.
+  std::vector<MmioReg> regs;
+  regs.insert(regs.end(), default_regs.begin(), default_regs.end());
+  regs.insert(regs.end(), recordbatch_regs.begin(), recordbatch_regs.end());
+  regs.insert(regs.end(), kernel_regs.begin(), kernel_regs.end());
+  regs.insert(regs.end(), profiling_regs.begin(), profiling_regs.end());
+
+  // Generate a Yaml file for vhdmmio based on the recordbatch description
+  auto ofs = std::ofstream("fletchgen.mmio.yaml");
+  ofs << GenerateVhdmmioYaml(&regs);
+  ofs.close();
+
+  // Generate the MMIO component.
+  mmio_comp = mmio(batch_desc, regs);
+  // Generate the kernel.
+  kernel_comp = kernel(opts->kernel_name, recordbatches, mmio_comp);
+  // Generate the nucleus.
+  nucleus_comp = nucleus(opts->kernel_name + "_Nucleus", recordbatches, kernel_comp, mmio_comp);
+  // Generate the mantle.
+  mantle_comp = mantle(opts->kernel_name + "_Mantle", recordbatches, nucleus_comp);
+
   // Run vhdmmio
   auto vhdmmio_result = system("vhdmmio -V vhdl -H -P vhdl");
   if (vhdmmio_result != 0) {
     FLETCHER_LOG(FATAL, "vhdmmio exited with status " << vhdmmio_result);
   }
-
-  return ret;
 }
 
 std::deque<cerata::OutputSpec> Design::GetOutputSpec() {
   std::deque<OutputSpec> result;
   OutputSpec omantle, okernel, onucleus;
 
+  std::string backup = options->backup ? "true" : "false";
   // Mantle
-  omantle.comp = mantle;
+  omantle.comp = mantle_comp;
   // Always overwrite mantle, as users should not modify.
-  omantle.meta[cerata::vhdl::metakeys::OVERWRITE_FILE] = "true";
+  omantle.meta[cerata::vhdl::metakeys::BACKUP_EXISTING] = backup;
   result.push_back(omantle);
 
   // Nucleus
-  onucleus.comp = nucleus;
+  onucleus.comp = nucleus_comp;
   // Check the force flag if kernel should be overwritten
-  onucleus.meta[cerata::vhdl::metakeys::OVERWRITE_FILE] = "true";
+  onucleus.meta[cerata::vhdl::metakeys::BACKUP_EXISTING] = backup;
   result.push_back(onucleus);
 
   // Kernel
-  okernel.comp = kernel;
+  okernel.comp = kernel_comp;
   // Check the force flag if kernel should be overwritten
-  okernel.meta[cerata::vhdl::metakeys::OVERWRITE_FILE] = options->overwrite ? "true" : "false";
+  okernel.meta[cerata::vhdl::metakeys::BACKUP_EXISTING] = backup;
   result.push_back(okernel);
 
   // RecordBatchReaders/Writers
@@ -164,7 +233,7 @@ std::deque<cerata::OutputSpec> Design::GetOutputSpec() {
     OutputSpec orecbatch;
     orecbatch.comp = recbatch;
     // Always overwrite readers/writers, as users should not modify.
-    orecbatch.meta[cerata::vhdl::metakeys::OVERWRITE_FILE] = "true";
+    orecbatch.meta[cerata::vhdl::metakeys::BACKUP_EXISTING] = backup;
     result.push_back(orecbatch);
   }
 

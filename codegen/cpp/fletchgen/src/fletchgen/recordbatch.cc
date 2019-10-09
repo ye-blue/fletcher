@@ -17,6 +17,7 @@
 #include <cerata/api.h>
 #include <memory>
 #include <deque>
+#include <utility>
 
 #include "fletchgen/array.h"
 #include "fletchgen/bus.h"
@@ -30,8 +31,9 @@ using cerata::Port;
 using cerata::Literal;
 using cerata::intl;
 
-RecordBatch::RecordBatch(const std::shared_ptr<FletcherSchema> &fletcher_schema)
-    : Component(fletcher_schema->name()), fletcher_schema_(fletcher_schema) {
+RecordBatch::RecordBatch(const std::shared_ptr<FletcherSchema> &fletcher_schema,
+                         fletcher::RecordBatchDescription batch_desc)
+    : Component(fletcher_schema->name()), fletcher_schema_(fletcher_schema), batch_desc_(std::move(batch_desc)) {
   // Get Arrow Schema
   auto as = fletcher_schema_->arrow_schema();
   // Add default port nodes
@@ -160,8 +162,9 @@ RecordBatch::GetFieldPorts(const std::optional<FieldPort::Function> &function) c
   return result;
 }
 
-std::shared_ptr<RecordBatch> RecordBatch::Make(const std::shared_ptr<FletcherSchema> &fletcher_schema) {
-  auto rb = new RecordBatch(fletcher_schema);
+std::shared_ptr<RecordBatch> recordbatch(const std::shared_ptr<FletcherSchema> &fletcher_schema,
+                                         const fletcher::RecordBatchDescription &batch_desc) {
+  auto rb = new RecordBatch(fletcher_schema, batch_desc);
   auto shared_rb = std::shared_ptr<RecordBatch>(rb);
   cerata::default_component_pool()->Add(shared_rb);
   return shared_rb;
@@ -179,7 +182,9 @@ std::shared_ptr<FieldPort> FieldPort::MakeArrowPort(const std::shared_ptr<Fletch
     dir = mode2dir(mode);
   }
   return std::make_shared<FieldPort>(fletcher_schema->name() + "_" + field->name(),
-                                     ARROW, field, fletcher_schema, GetStreamType(*field, mode), dir, domain);
+                                     ARROW, field, fletcher_schema, GetStreamType(*field, mode), dir,
+                                     domain,
+                                     fletcher::GetBoolMeta(*field, "fletcher_profile", true));
 }
 
 std::shared_ptr<FieldPort> FieldPort::MakeCommandPort(const std::shared_ptr<FletcherSchema> &fletcher_schema,
@@ -193,24 +198,15 @@ std::shared_ptr<FieldPort> FieldPort::MakeCommandPort(const std::shared_ptr<Flet
     type = cmd(tag_width(*field));
   }
   return std::make_shared<FieldPort>(fletcher_schema->name() + "_" + field->name() + "_cmd",
-                                     COMMAND,
-                                     field,
-                                     fletcher_schema,
-                                     type,
-                                     Dir::IN,
-                                     domain);
+                                     COMMAND, field, fletcher_schema, type, Dir::IN, domain, false);
 }
 
 std::shared_ptr<FieldPort> FieldPort::MakeUnlockPort(const std::shared_ptr<FletcherSchema> &fletcher_schema,
                                                      const std::shared_ptr<arrow::Field> &field,
                                                      const std::shared_ptr<ClockDomain> &domain) {
   return std::make_shared<FieldPort>(fletcher_schema->name() + "_" + field->name() + "_unl",
-                                     UNLOCK,
-                                     field,
-                                     fletcher_schema,
-                                     unlock(tag_width(*field)),
-                                     Dir::OUT,
-                                     domain);
+                                     UNLOCK, field, fletcher_schema, unlock(tag_width(*field)), Dir::OUT, domain,
+                                     false);
 }
 
 std::shared_ptr<Node> FieldPort::data_width() {
@@ -230,7 +226,7 @@ std::shared_ptr<Node> FieldPort::data_width() {
 std::shared_ptr<cerata::Object> FieldPort::Copy() const {
   // Take shared ownership of the type.
   auto typ = type()->shared_from_this();
-  auto result = std::make_shared<FieldPort>(name(), function_, field_, fletcher_schema_, typ, dir(), domain_);
+  auto result = std::make_shared<FieldPort>(name(), function_, field_, fletcher_schema_, typ, dir(), domain_, profile_);
   result->meta = meta;
   return result;
 }

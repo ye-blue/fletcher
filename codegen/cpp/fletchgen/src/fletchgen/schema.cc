@@ -126,6 +126,7 @@ void SchemaSet::Sort() {
 
   // Sort the schemas by name, then by mode
   std::sort(schemas_.begin(), schemas_.end(), NameSort);
+  // Important to keep stable sorting here, else we might lose name order.
   std::stable_sort(schemas_.begin(), schemas_.end(), ModeSort);
 }
 

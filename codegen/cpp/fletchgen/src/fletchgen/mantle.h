@@ -35,19 +35,10 @@ using cerata::Instance;
  */
 class Mantle : public Component {
  public:
-  /// @brief Construct a Mantle and return a shared pointer to it.
-  static std::shared_ptr<Mantle> Make(const std::string& name,
-                                      const SchemaSet &schema_set,
-                                      const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                                      const std::vector<MmioReg>& custom_regs = {});
-  /// @brief Construct a Mantle and return a shared pointer to it.
-  static std::shared_ptr<Mantle> Make(const SchemaSet &schema_set,
-                                      const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                                      const std::vector<MmioReg>& custom_regs = {});
-
-  /// @brief Return the SchemaSet on which this Mantle is based.
-  SchemaSet schema_set() const { return schema_set_; }
-
+  /// @brief Construct a Mantle based on a SchemaSet
+  explicit Mantle(std::string name,
+                  const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+                  const std::shared_ptr<Nucleus> &nucleus);
   /// @brief Return the kernel component of this Mantle.
   std::shared_ptr<Nucleus> nucleus() const { return nucleus_; }
   /// @brief Return all RecordBatch(Reader/Writer) instances of this Mantle.
@@ -56,18 +47,10 @@ class Mantle : public Component {
   std::deque<std::shared_ptr<RecordBatch>> recordbatch_components() const { return recordbatch_components_; }
 
  protected:
-  /// @brief Construct a Mantle based on a SchemaSet
-  explicit Mantle(std::string name,
-                  SchemaSet schema_set,
-                  const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                  const std::vector<MmioReg>& custom_regs);
-
   /// The Nucleus to be instantiated by this Mantle.
   std::shared_ptr<Nucleus> nucleus_;
   /// Shortcut to the instantiated Nucleus.
   Instance *nucleus_inst_;
-  /// The schema set on which this Mantle is based.
-  SchemaSet schema_set_;
   /// The bus arbiters instantiated by this mantle for a specific bus specification.
   std::unordered_map<BusSpec, Instance *> arbiters_;
   /// The RecordBatch instances.
@@ -75,5 +58,10 @@ class Mantle : public Component {
   /// The RecordBatch components.
   std::deque<std::shared_ptr<RecordBatch>> recordbatch_components_;
 };
+
+/// @brief Construct a Mantle and return a shared pointer to it.
+std::shared_ptr<Mantle> mantle(const std::string &name,
+                               const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+                               const std::shared_ptr<Nucleus> &nucleus);
 
 }  // namespace fletchgen

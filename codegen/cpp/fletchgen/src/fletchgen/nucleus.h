@@ -39,21 +39,18 @@ struct ArrayCmdCtrlMerger : Component {
 };
 
 /// @brief Create an instance of an ArrayCmdCtrlMerger.
-std::unique_ptr<Instance> ArrayCmdCtrlMergerInstance(const std::string& name);
+std::unique_ptr<Instance> ArrayCmdCtrlMergerInstance(const std::string &name);
 
 /// @brief It's like a kernel, but there is a kernel inside.
 struct Nucleus : Component {
   /// @brief Construct a new Nucleus.
   explicit Nucleus(const std::string &name,
-                   const std::deque<RecordBatch *> &recordbatches,
-                   const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                   const std::vector<MmioReg>& custom_regs);
+                   const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+                   const std::shared_ptr<Kernel> &kernel,
+                   const std::shared_ptr<Component> &mmio);
 
-  /// @brief Make an Nucleus component based on RecordBatch components. Returns a shared pointer to the new Nucleus.
-  static std::shared_ptr<Nucleus> Make(const std::string &name,
-                                       const std::deque<RecordBatch *> &recordbatches,
-                                       const std::vector<fletcher::RecordBatchDescription> &batch_desc,
-                                       const std::vector<MmioReg>& custom_regs);
+  /// @brief Return all field-derived ports with a specific function.
+  std::vector<FieldPort *> GetFieldPorts(FieldPort::Function fun) const;
 
   /// The kernel component.
   std::shared_ptr<Kernel> kernel;
@@ -61,5 +58,11 @@ struct Nucleus : Component {
   /// The kernel instance.
   Instance *kernel_inst;
 };
+
+/// @brief Make an Nucleus component based on RecordBatch components. Returns a shared pointer to the new Nucleus.
+std::shared_ptr<Nucleus> nucleus(const std::string &name,
+                                 const std::vector<std::shared_ptr<RecordBatch>> &recordbatches,
+                                 const std::shared_ptr<Kernel> &kernel,
+                                 const std::shared_ptr<Component> &mmio);
 
 }  // namespace fletchgen
