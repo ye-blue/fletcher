@@ -53,9 +53,16 @@ inline void StopLogging() {
  */
 #include <iostream>
 
-#define FLETCHER_LOG(level, msg) std::cout << "[" << fletcher::level2str(FLETCHER_LOG_##level) + "]: "  \
-                                           << msg                                                       \
-                                           << std::endl
+#define FLETCHER_LOG(level, msg) \
+  if (FLETCHER_LOG_##level  > 1) {                                        \
+    std::cerr << "[" + fletcher::level2str(FLETCHER_LOG_##level) + "]: "  \
+              << msg                                                      \
+              << std::endl;                                               \
+  } else {                                                                \
+    std::cout << "[" << fletcher::level2str(FLETCHER_LOG_##level) + "]: " \
+              << msg                                                      \
+              << std::endl;                                               \
+  }
 
 // Default logging
 constexpr int FLETCHER_LOG_DEBUG = -1;
