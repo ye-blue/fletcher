@@ -73,11 +73,24 @@ bool MustIgnore(const arrow::Field &field) {
 
 int GetIntMeta(const arrow::Field &field, const std::string &key, int default_to) {
   int ret = default_to;
-  auto strepc = GetMeta(field, key);
-  if (!strepc.empty()) {
-    ret = stoi(strepc);
+  auto str = GetMeta(field, key);
+  if (!str.empty()) {
+    ret = stoi(str);
   }
   return ret;
+}
+
+bool GetBoolMeta(const arrow::Field &field, const std::string &key, bool default_to) {
+  auto str = GetMeta(field, key);
+  if (!str.empty()) {
+    if (str == "true") {
+      return true;
+    }
+    if (str == "false") {
+      return false;
+    }
+  }
+  return default_to;
 }
 
 std::shared_ptr<arrow::Schema> AppendMetaRequired(const arrow::Schema &schema,
@@ -103,6 +116,13 @@ std::shared_ptr<arrow::Field> AppendMetaIgnore(const arrow::Field &field) {
   std::vector<std::string> ignore_key = {"fletcher_ignore"};
   std::vector<std::string> ignore_value = {"true"};
   auto meta = std::make_shared<arrow::KeyValueMetadata>(ignore_key, ignore_value);
+  return field.WithMetadata(meta);
+}
+
+std::shared_ptr<arrow::Field> AppendMetaProfile(const arrow::Field &field) {
+  std::vector<std::string> profile_key = {"fletcher_profile"};
+  std::vector<std::string> profile_value = {"true"};
+  auto meta = std::make_shared<arrow::KeyValueMetadata>(profile_key, profile_value);
   return field.WithMetadata(meta);
 }
 
@@ -199,32 +219,6 @@ std::string ToString(const std::vector<std::string> &strvec, const std::string &
     }
   }
   return result;
-}
-
-void AppendExpectedBuffersFromField(std::vector<std::string> *buffers, const arrow::Field &field) {
-  // Flatten in case this is a struct:
-  auto flat_fields = field.Flatten();
-
-  // Parse the flattened fields:
-  for (const auto &f : flat_fields) {
-    if (f->type() == arrow::utf8()) {
-      buffers->push_back(f->name() + "_offsets");
-      buffers->push_back(f->name() + "_values");
-    } else if (f->type() == arrow::binary()) {
-      buffers->push_back(f->name() + "_offsets");
-      buffers->push_back(f->name() + "_values");
-    } else {
-      if (f->nullable()) {
-        buffers->push_back(f->name() + "_validity");
-      }
-      if (f->type()->id() == arrow::ListType::type_id) {
-        buffers->push_back(f->name() + "_offsets");
-        AppendExpectedBuffersFromField(buffers, *f->type()->child(0));
-      } else {
-        buffers->push_back(f->name() + "_values");
-      }
-    }
-  }
 }
 
 }  // namespace fletcher
