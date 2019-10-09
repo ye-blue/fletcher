@@ -392,6 +392,7 @@ std::shared_ptr<Type> GetStreamType(const arrow::Field &field, fletcher::Mode mo
           RecField::Make("count", count(l_count_width)),
           RecField::Make("bytes", slave)
       });
+      epc = lepc;
       break;
     }
 
@@ -417,6 +418,7 @@ std::shared_ptr<Type> GetStreamType(const arrow::Field &field, fletcher::Mode mo
           RecField::Make("count", count(l_count_width)),
           RecField::Make("chars", slave)
       });
+      epc = lepc;
       break;
     }
 
@@ -440,6 +442,7 @@ std::shared_ptr<Type> GetStreamType(const arrow::Field &field, fletcher::Mode mo
           RecField::Make("length", length(length_width)),
           RecField::Make(arrow_child->name(), slave)
       });
+      epc = lepc;
       break;
     }
 
@@ -477,7 +480,7 @@ std::shared_ptr<Type> GetStreamType(const arrow::Field &field, fletcher::Mode mo
     if (field.nullable()) {
       record->AddField(RecField::Make("validity", validity()));
     }
-    auto stream = Stream::Make(name, record);
+    auto stream = Stream::Make(name, record, epc);
     return stream;
   } else {
     // Otherwise just return the type
