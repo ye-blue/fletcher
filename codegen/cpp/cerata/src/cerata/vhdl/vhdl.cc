@@ -41,27 +41,30 @@ void VHDLOutputGenerator::Generate() {
 
     CERATA_LOG(INFO, "VHDL: Generating sources for component " + o.comp->name());
     auto vhdl_source = vhdl_design.Generate().ToString();
-    auto vhdl_path = root_dir_ + "/" + subdir() + "/" + o.comp->name() + ".vhd";
+    auto vhdl_path = root_dir_ + "/" + subdir() + "/" + o.comp->name() + ".gen.vhd";
 
-    bool overwrite = false;
-
-    if (o.meta.count(metakeys::OVERWRITE_FILE) > 0) {
-      if (o.meta.at(metakeys::OVERWRITE_FILE) == "true") {
-        overwrite = true;
+    // Disable backup by default.
+    bool backup = false;
+    if (o.meta.count(metakeys::BACKUP_EXISTING) > 0) {
+      if (o.meta.at(metakeys::BACKUP_EXISTING) == "true") {
+        backup = true;
       }
     }
 
     CERATA_LOG(INFO, "VHDL: Saving design to: " + vhdl_path);
-    if (!FileExists(vhdl_path) || overwrite) {
+    if (!FileExists(vhdl_path) || !backup) {
       auto vhdl_file = std::ofstream(vhdl_path);
       vhdl_file << vhdl_source;
       vhdl_file.close();
     } else {
-      CERATA_LOG(INFO, "VHDL: File exists, saving to " + vhdl_path + "t");
-      // Save as a vhdt file.
-      auto vhdl_file = std::ofstream(vhdl_path + "t");
+      CERATA_LOG(INFO, "VHDL: File exists, backing up and saving to " + vhdl_path + "t");
+      // Copy the old file.
+      auto original = std::ifstream(vhdl_path, std::ios::binary);
+      auto copy = std::ofstream(vhdl_path + ".bak", std::ios::binary);
+      copy << original.rdbuf();
+      // Save the new file.
+      auto vhdl_file = std::ofstream(vhdl_path);
       vhdl_file << vhdl_source;
-      vhdl_file.close();
     }
 
     num_graphs++;

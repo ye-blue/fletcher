@@ -47,8 +47,8 @@ constexpr char NAME[] = "vhdl_name";
 /// Forces a signal to be declared as an std_logic_vector, even if its width is only 1.
 constexpr char FORCE_VECTOR[] = "vhdl_force_vector";
 
-/// Forces overwriting of generated files.
-constexpr char OVERWRITE_FILE[] = "overwrite";
+/// Forces backing up of existing files.
+constexpr char BACKUP_EXISTING[] = "overwrite";
 
 /// Reserved metadata key for stream expansion.
 constexpr char WAS_EXPANDED[] = "vhdl_expanded_stream_done";
