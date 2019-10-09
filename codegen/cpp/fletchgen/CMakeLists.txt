@@ -54,6 +54,7 @@ add_compile_unit(
     src/fletchgen/fletchgen.cc
     src/fletchgen/nucleus.cc
     src/fletchgen/profiler.cc
+    src/fletchgen/axi4_lite.cc
 
     src/fletchgen/srec/recordbatch.cc
     src/fletchgen/srec/srec.cc
